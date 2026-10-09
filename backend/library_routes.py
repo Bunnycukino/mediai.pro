@@ -5,7 +5,7 @@ from fastapi import APIRouter, Query
 
 router = APIRouter(prefix="/library", tags=["library"])
 CATALOGUE = json.loads(
-    (Path(__file__).resolve().parent.parent / "frontend/src/data/library.json").read_text(encoding="utf-8")
+    (Path(__file__).resolve().parent / "library.json").read_text(encoding="utf-8")
 )
 
 
