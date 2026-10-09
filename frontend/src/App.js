@@ -11,6 +11,7 @@ import Chat from "@/pages/Chat";
 import Profile from "@/pages/Profile";
 import History from "@/pages/History";
 import Admin from "@/pages/Admin";
+import Library from "@/pages/Library";
 
 function HomeRedirect() {
   const { user, loading } = useAuth();
@@ -30,6 +31,7 @@ export default function App() {
               <Route path="/" element={<HomeRedirect />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/library" element={<Library />} />
               <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/chat/:id" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
