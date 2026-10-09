@@ -56,6 +56,7 @@ export default function Navbar() {
         </nav>
 
         <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+          {user && <Link to="/chat" className={`md:hidden ${linkCls("/chat")}`} data-testid="nav-chat-mobile"><MessageSquare className="inline w-4 h-4 mr-1" /> Chat</Link>}
           <Link to="/library" className={linkCls("/library")} data-testid="nav-library">Library</Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -86,6 +87,9 @@ export default function Navbar() {
               <DropdownMenuContent align="end" className="rounded-2xl w-56">
                 <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => nav("/chat")} data-testid="menu-chat">
+                  <MessageSquare className="w-4 h-4 mr-2" /> Chat
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => nav("/profile")} data-testid="menu-profile">
                   <UserIcon className="w-4 h-4 mr-2" /> {t("profile")}
                 </DropdownMenuItem>
