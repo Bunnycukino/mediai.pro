@@ -23,7 +23,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-[#F9F8F6]/80 backdrop-blur-xl border-b border-[#E1DFDA]">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 min-h-[4rem] py-2 flex flex-wrap gap-2 items-center justify-between">
         <Link to={user ? "/chat" : "/"} className="flex items-center gap-2" data-testid="nav-logo">
           <div className="w-9 h-9 rounded-2xl bg-[#8BA888] flex items-center justify-center text-white">
             <Heart className="w-5 h-5" strokeWidth={1.6} />
@@ -55,7 +55,7 @@ export default function Navbar() {
           )}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
           <Link to="/library" className={linkCls("/library")} data-testid="nav-library">Library</Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
