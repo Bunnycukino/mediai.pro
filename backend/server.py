@@ -1,4 +1,4 @@
-"""SusStyle AI Medical Helper — main FastAPI application."""
+"""MediAI Medical Helper — main FastAPI application."""
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -82,14 +82,14 @@ async def lifespan(app: FastAPI):
     client.close()
 
 
-app = FastAPI(title="SusStyle AI Medical Helper", lifespan=lifespan)
+app = FastAPI(title="MediAI Medical Helper", lifespan=lifespan)
 
 api_router = APIRouter(prefix="/api")
 
 
 @api_router.get("/")
 async def root():
-    return {"service": "SusStyle AI Medical Helper", "status": "ok"}
+    return {"service": "MediAI Medical Helper", "status": "ok"}
 
 
 @api_router.get("/health")
@@ -107,7 +107,7 @@ app.include_router(api_router)
 
 # CORS — needs explicit origin when cookies are used (allow_credentials=True)
 frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:3000")
-allowed_origins = [frontend_url, "http://localhost:3000", "https://susstyle.com", "https://www.susstyle.com", "https://susstyle.vercel.app"]
+allowed_origins = ["https://mediai.pro", "https://www.mediai.pro", frontend_url, "http://localhost:3000", "https://susstyle.com", "https://www.susstyle.com", "https://susstyle.vercel.app"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
