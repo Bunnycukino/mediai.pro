@@ -2,7 +2,7 @@
 
 The public `/library` page is a curated, searchable directory of 11 external health resources. Searches run in the browser and do not transmit the search text. Records live in `frontend/src/data/library.json`; English and Polish keywords are supported. Links were checked on 9 October 2026. This is a link check, not a clinical review.
 
-The prepared backend endpoint `GET /api/library/search?q=first%20aid&limit=5` searches the same metadata, with optional `category`. It returns `scope: link_metadata_only`. The endpoint is available only after deploying this backend. The existing Render service has not been migrated to this repository.
+The prepared backend endpoint `GET /api/library/search?q=first%20aid&limit=5` searches the same metadata, with optional `category`. It returns `scope: link_metadata_only`. The endpoint is available only after deploying this backend. The existing Render service has not been migrated to this repository. Keep `backend/library.json` in sync with the frontend catalogue: Render's backend root cannot access frontend files.
 
 ## Agent access and limits
 
