@@ -52,7 +52,7 @@ export default function Landing() {
             <div className="mt-10 flex flex-wrap gap-3">
               <Button asChild size="lg" className="rounded-full btn-sage h-14 px-8 text-base" data-testid="hero-cta-start">
                 <Link to="/register">
-                  {t("getStarted")} <ArrowRight className="w-4 h-4 ml-2" />
+                  Start learning <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="rounded-full h-14 px-8 text-base border-[#E1DFDA] bg-white/70">
@@ -130,7 +130,7 @@ export default function Landing() {
         </p>
         <Button asChild size="lg" className="rounded-full btn-sage h-14 px-10 text-base" data-testid="cta-bottom">
           <Link to="/register">
-            {t("getStarted")} <ArrowRight className="w-4 h-4 ml-2" />
+            Start learning <ArrowRight className="w-4 h-4 ml-2" />
           </Link>
         </Button>
       </section>
