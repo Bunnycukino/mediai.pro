@@ -15,8 +15,7 @@ import Library from "@/pages/Library";
 
 function HomeRedirect() {
   const { user, loading } = useAuth();
-  if (loading || user === null) return null;
-  if (user) return <Navigate to={user.role === "admin" ? "/admin" : "/chat"} replace />;
+  if (!loading && user) return <Navigate to={user.role === "admin" ? "/admin" : "/chat"} replace />;
   return <Landing />;
 }
 
