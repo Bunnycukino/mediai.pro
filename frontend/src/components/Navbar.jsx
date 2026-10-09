@@ -56,6 +56,7 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link to="/library" className={linkCls("/library")} data-testid="nav-library">Library</Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="rounded-full text-[#5C6A64]" data-testid="lang-switcher">
