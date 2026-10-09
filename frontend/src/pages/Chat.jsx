@@ -239,7 +239,7 @@ export default function Chat() {
       <Navbar />
 
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <aside className="lg:col-span-3 bg-white border border-[#E1DFDA] rounded-3xl p-4 h-[calc(100vh-9rem)] flex flex-col">
+        <aside className="order-2 lg:order-1 lg:col-span-3 bg-white border border-[#E1DFDA] rounded-3xl p-4 h-72 lg:h-[calc(100dvh-9rem)] flex flex-col min-w-0">
           <Button onClick={newChat} className="rounded-full btn-sage mb-4" data-testid="new-chat-btn">
             <Plus className="w-4 h-4 mr-2" /> {t("newChat")}
           </Button>
@@ -283,8 +283,11 @@ export default function Chat() {
           </ScrollArea>
         </aside>
 
-        <main className="lg:col-span-9 flex flex-col bg-white border border-[#E1DFDA] rounded-3xl overflow-hidden h-[calc(100vh-9rem)]">
+        <main className="order-1 lg:order-2 lg:col-span-9 min-w-0 flex flex-col bg-white border border-[#E1DFDA] rounded-3xl overflow-hidden h-[max(32rem,calc(100dvh-9rem))] lg:h-[calc(100dvh-9rem)]">
           <div className="flex flex-wrap gap-3 items-center px-4 md:px-6 py-3 border-b border-[#E1DFDA] bg-[#F9F8F6]/60">
+            <Button onClick={newChat} variant="outline" className="lg:hidden rounded-full h-9" data-testid="new-chat-mobile">
+              <Plus className="w-4 h-4 mr-2" /> {t("newChat")}
+            </Button>
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#8BA888]" />
               <Select value={model} onValueChange={setModel}>
@@ -328,7 +331,7 @@ export default function Chat() {
             )}
           </div>
 
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 md:px-10 py-6 space-y-5">
+          <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 md:px-10 py-6 space-y-5">
             {asArray(messages).length === 0 && (
               <div className="text-center py-12 text-[#5C6A64] max-w-xl mx-auto">
                 <div className="w-14 h-14 rounded-2xl bg-[#8BA888]/12 text-[#8BA888] flex items-center justify-center mx-auto mb-5">
@@ -336,7 +339,7 @@ export default function Chat() {
                 </div>
                 <h2 className="font-heading text-2xl text-[#1A2E25] mb-3">How can I help you today?</h2>
                 <p className="text-sm">
-                  Describe a symptom, ask about a medication, or get a second opinion. All advice is sourced from authoritative medical literature.
+                  Ask an educational health question. AI can be inaccurate and does not replace professional care. Library articles are not automatically consulted to produce these answers.
                 </p>
               </div>
             )}
@@ -421,7 +424,7 @@ export default function Chat() {
                 }}
                 placeholder={t("askPlaceholder")}
                 rows={1}
-                className="flex-1 resize-none border-0 bg-transparent focus-visible:ring-0 max-h-40"
+                className="flex-1 min-w-0 text-base resize-none border-0 bg-transparent focus-visible:ring-0 max-h-40"
                 data-testid="chat-input"
               />
 
@@ -445,7 +448,7 @@ export default function Chat() {
                 className="rounded-full btn-sage shrink-0 px-5"
                 data-testid="send-btn"
               >
-                <Send className="w-4 h-4 mr-1.5" /> {t("send")}
+                <Send className="w-4 h-4 sm:mr-1.5" /><span className="sr-only sm:not-sr-only">{t("send")}</span>
               </Button>
             </div>
 
