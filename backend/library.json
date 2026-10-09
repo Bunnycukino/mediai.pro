@@ -1,0 +1,101 @@
+[
+  {
+    "id": "nhs-conditions",
+    "title": "Health conditions A to Z",
+    "publisher": "NHS",
+    "category": "Health education",
+    "url": "https://www.nhs.uk/conditions/",
+    "description": "Browse NHS information about health conditions.",
+    "tags": "symptoms illness choroby objawy zdrowie"
+  },
+  {
+    "id": "medline-topics",
+    "title": "Health topics",
+    "publisher": "MedlinePlus / National Library of Medicine",
+    "category": "Health education",
+    "url": "https://medlineplus.gov/healthtopics.html",
+    "description": "Explore health topics from the US National Library of Medicine. Local services and guidance can differ from the UK.",
+    "tags": "education anatomy disease edukacja anatomia"
+  },
+  {
+    "id": "sja-first-aid",
+    "title": "First aid advice",
+    "publisher": "St John Ambulance",
+    "category": "First aid",
+    "url": "https://www.sja.org.uk/first-aid-advice/",
+    "description": "Read first aid information directly from St John Ambulance. Do not wait for AI in an emergency.",
+    "tags": "first aid help pierwsza pomoc choking bleeding burns zadlawienie krwawienie oparzenia"
+  },
+  {
+    "id": "nhs-emergency",
+    "title": "When to call 999",
+    "publisher": "NHS",
+    "category": "Urgent help",
+    "url": "https://www.nhs.uk/nhs-services/urgent-and-emergency-care-services/when-to-call-999/",
+    "description": "Official information about emergency help in the UK.",
+    "tags": "emergency urgent ambulance alarm ratunek pogotowie"
+  },
+  {
+    "id": "pmc-oa",
+    "title": "Open access medical research",
+    "publisher": "PubMed Central / NLM",
+    "category": "Research",
+    "url": "https://pmc.ncbi.nlm.nih.gov/tools/openftlist/",
+    "description": "Find the PMC Open Access collection and its reuse information. Research articles are not individual medical advice.",
+    "tags": "research science evidence papers badania nauka publikacje"
+  },
+  {
+    "id": "nhs-asthma",
+    "title": "Asthma",
+    "publisher": "NHS",
+    "category": "Health education",
+    "url": "https://www.nhs.uk/conditions/asthma/",
+    "description": "NHS information about asthma, its symptoms and care.",
+    "tags": "asthma breathing lungs astma oddychanie pluca"
+  },
+  {
+    "id": "nhs-back",
+    "title": "Back pain",
+    "publisher": "NHS",
+    "category": "Health education",
+    "url": "https://www.nhs.uk/conditions/back-pain/",
+    "description": "Read about back pain and when to seek help.",
+    "tags": "back pain spine bol plecy kregoslup"
+  },
+  {
+    "id": "nhs-diabetes",
+    "title": "Diabetes",
+    "publisher": "NHS",
+    "category": "Health education",
+    "url": "https://www.nhs.uk/conditions/diabetes/",
+    "description": "An introduction to diabetes and links to NHS information about its types.",
+    "tags": "diabetes glucose blood sugar cukrzyca cukier"
+  },
+  {
+    "id": "nhs-depression",
+    "title": "Depression",
+    "publisher": "NHS",
+    "category": "Mental health",
+    "url": "https://www.nhs.uk/mental-health/conditions/depression/",
+    "description": "NHS information about depression and support.",
+    "tags": "depression mental mood depresja psychiczne nastroj"
+  },
+  {
+    "id": "nhs-anaphylaxis",
+    "title": "Anaphylaxis",
+    "publisher": "NHS",
+    "category": "Urgent help",
+    "url": "https://www.nhs.uk/conditions/anaphylaxis/",
+    "description": "Information about a serious allergic reaction. Suspected anaphylaxis needs emergency help; do not wait for AI.",
+    "tags": "anaphylaxis allergy allergic anafilaksja alergia"
+  },
+  {
+    "id": "nhs-dehydration",
+    "title": "Dehydration",
+    "publisher": "NHS",
+    "category": "Health education",
+    "url": "https://www.nhs.uk/conditions/dehydration/",
+    "description": "NHS information about dehydration and when to get help.",
+    "tags": "dehydration fluids water odwodnienie woda"
+  }
+]
