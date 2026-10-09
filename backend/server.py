@@ -27,6 +27,7 @@ from profile_routes import router as profile_router  # noqa: E402
 from chat_routes import router as chat_router  # noqa: E402
 from voice_routes import router as voice_router  # noqa: E402
 from admin_routes import router as admin_router  # noqa: E402
+from library_routes import router as library_router  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -102,6 +103,7 @@ api_router.include_router(profile_router)
 api_router.include_router(chat_router)
 api_router.include_router(voice_router)
 api_router.include_router(admin_router)
+api_router.include_router(library_router)
 
 app.include_router(api_router)
 
