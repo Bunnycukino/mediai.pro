@@ -14,11 +14,18 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 # Groq is primary - free, fast, no daily quota exhaustion
 # Gemini as fallback, OpenAI as last resort
 MODEL_PROVIDERS = {
-    "llama-3.3-70b": ("groq", "llama-3.3-70b-versatile"),
-    "llama-3.1-8b": ("groq", "llama-3.1-8b-instant"),
-    "gemini-2.0-flash": ("gemini", "gemini-2.0-flash"),
+    "gpt-oss-120b": ("groq", "openai/gpt-oss-120b"),
+    "gpt-oss-20b": ("groq", "openai/gpt-oss-20b"),
     "gpt-4o-mini": ("openai", "gpt-4o-mini"),
 }
+DEFAULT_MODEL = "gpt-oss-120b"
+LEGACY_MODELS = {"llama-3.3-70b": DEFAULT_MODEL, "llama-3.3-70b-versatile": DEFAULT_MODEL,
+                 "llama-3.1-8b": "gpt-oss-20b", "llama-3.1-8b-instant": "gpt-oss-20b"}
+
+
+def resolve_model(model):
+    key = LEGACY_MODELS.get(model, model)
+    return key if key in MODEL_PROVIDERS else DEFAULT_MODEL
 
 LANGUAGES = {
     "en": "English", "es": "Spanish", "fr": "French", "de": "German",
@@ -50,11 +57,14 @@ def build_system_prompt(profile: dict, language: str, extra: str = "") -> str:
         if profile.get("allergies"): bits.append(f"Allergies: {', '.join(profile['allergies'])}")
         if bits:
             profile_summary = "Patient profile: " + "; ".join(bits) + "."
-    prompt = f"""You are SusStyle AI Medical Helper, a knowledgeable medical assistant.
+    prompt = f"""You are MediAI, an educational health information assistant.
 Always respond in {lang_name}.
 Provide accurate, evidence-based medical information.
 Always recommend consulting a healthcare professional for diagnosis and treatment.
 Be compassionate and clear.
+You are not a doctor. You cannot diagnose or rule out serious illness.
+Do not claim to have consulted library articles or verified sources unless they were actually provided.
+Do not advise delaying care or changing prescribed treatment. For a life-threatening emergency in the UK, advise calling 999 or 112 immediately.
 {profile_summary}
 {extra}"""
     return prompt
@@ -74,9 +84,13 @@ async def call_groq(model_id: str, messages: list, system_prompt: str) -> str:
     response = await client.chat.completions.create(
         model=model_id,
         messages=full_messages,
-        max_tokens=1500,
+        max_tokens=2048,
+        reasoning_effort="low",
     )
-    return response.choices[0].message.content
+    content = response.choices[0].message.content
+    if not content:
+        raise HTTPException(status_code=502, detail="AI returned an empty answer. Please retry.")
+    return content
 
 
 async def call_gemini(model_id: str, messages: list, system_prompt: str) -> str:
@@ -133,7 +147,7 @@ async def list_models(user: dict = Depends(get_current_user)):
     ]
     return {
         "models": models_list,
-        "default": settings.get("default_model", "llama-3.3-70b"),
+        "default": resolve_model(settings.get("default_model")),
         "languages": [{"code": k, "name": v} for k, v in LANGUAGES.items()],
     }
 
@@ -157,7 +171,7 @@ async def create_conversation(data: ConversationCreate, user: dict = Depends(get
     doc = {
         "user_id": uid,
         "title": data.title or "New consultation",
-        "model": data.model or "llama-3.3-70b",
+        "model": resolve_model(data.model),
         "created_at": datetime.now(timezone.utc),
         "updated_at": datetime.now(timezone.utc),
     }
@@ -199,9 +213,7 @@ async def delete_conversation(conv_id: str, user: dict = Depends(get_current_use
 async def send_message(request: ChatRequest, user: dict = Depends(get_current_user)):
     from server import db
     uid = str(user["id"])
-    model_key = request.model or "llama-3.3-70b"
-    if model_key not in MODEL_PROVIDERS:
-        model_key = "llama-3.3-70b"
+    model_key = resolve_model(request.model)
     provider, model_id = MODEL_PROVIDERS[model_key]
 
     # Get or create conversation
