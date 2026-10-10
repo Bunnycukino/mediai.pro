@@ -5,8 +5,16 @@ import json
 from pathlib import Path
 from openai import OpenAI
 from library_matching import match_reading
+from chat_routes import public_document, build_system_prompt
 
 def main():
+    sample = {"_id": "test-id", "content": "synthetic test"}
+    public = public_document(sample)
+    assert public["id"] == public["_id"] == "test-id"
+    assert "id" not in sample
+    prompt = build_system_prompt({}, "en")
+    assert "100-150 words" in prompt and "cannot diagnose" in prompt
+    print("Chat identifier contract and concise safety prompt checks passed.")
     catalogue = json.loads((Path(__file__).parent / "library.json").read_text(encoding="utf-8"))
     assert match_reading("Where can I learn about asthma?", catalogue)[0]["id"] == "nhs-asthma"
     assert match_reading("Co mogę przeczytać o astmie?", catalogue)[0]["id"] == "nhs-asthma"
