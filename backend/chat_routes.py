@@ -8,6 +8,9 @@ from bson.errors import InvalidId
 
 from auth_utils import get_current_user
 from models import ChatRequest, ConversationCreate
+from library_routes import CATALOGUE
+from library_matching import match_reading
+import json
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -253,7 +256,18 @@ async def send_message(request: ChatRequest, user: dict = Depends(get_current_us
     # Get user profile
     profile_doc = await db.profiles.find_one({"user_id": uid}) or {}
     profile = profile_doc.get("data", {})
-    system_prompt = build_system_prompt(profile, request.language or "en")
+    further_reading = match_reading(request.message, CATALOGUE)
+    library_context = ""
+    if further_reading:
+        library_context = (
+            "Library catalogue metadata for further reading (not article text):\n"
+            + json.dumps(further_reading, ensure_ascii=False)
+            + "\nYou may suggest these original publisher links as further reading. "
+            "You have not retrieved their articles. Do not say your answer was checked "
+            "against them, supported by them, or that a publisher endorses MediAI. "
+            "Topic matches are not diagnoses or assessments of urgency."
+        )
+    system_prompt = build_system_prompt(profile, request.language or "en", library_context)
 
     # Call AI
     try:
@@ -274,6 +288,7 @@ async def send_message(request: ChatRequest, user: dict = Depends(get_current_us
         "role": "assistant",
         "content": reply,
         "model": model_key,
+        "further_reading": further_reading,
         "created_at": datetime.now(timezone.utc),
     }
     await db.messages.insert_one(assistant_msg)
