@@ -18,9 +18,7 @@ import { Search, Users, MessageSquare, Settings as SettingsIcon, BarChart3, Eye,
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line } from "recharts";
 
 const ALL_MODELS = [
-  "gpt-5.2", "gpt-5.1", "gpt-4o",
-  "claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001",
-  "gemini-2.5-pro", "gemini-2.5-flash",
+  "gpt-oss-120b", "gpt-oss-20b", "gpt-4o-mini",
 ];
 
 export default function Admin() {
