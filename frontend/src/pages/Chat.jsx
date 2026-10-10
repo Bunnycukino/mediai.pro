@@ -149,6 +149,7 @@ export default function Chat() {
       }
     } catch (e) {
       setMessages((prev) => asArray(prev).filter((x) => x?.id !== tempId));
+      setInput(current => current || text);
       toast.error(formatApiError(e?.response?.data?.detail));
     } finally {
       setSending(false);
