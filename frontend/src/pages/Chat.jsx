@@ -390,6 +390,19 @@ export default function Chat() {
                     </div>
                   )}
 
+                  {m.role === "assistant" && asArray(m.further_reading).length > 0 && (
+                    <aside className="mt-4 pt-3 border-t border-[#1A2E25]/10" aria-label="Library further reading">
+                      <h3 className="text-sm font-semibold flex items-center gap-2"><BookOpen size={14} /> Library · further reading</h3>
+                      <p className="text-xs text-[#5C6A64] mt-2">Topic links only. Article text was not retrieved and does not verify this AI answer.</p>
+                      <ul className="mt-3 space-y-2">
+                        {asArray(m.further_reading).map(resource => <li key={resource.id} className="text-sm">
+                          <a href={resource.url} target="_blank" rel="noopener noreferrer" className="underline inline-flex items-center gap-1">{resource.title}<ExternalLink size={12} /></a>
+                          <span className="block text-xs text-[#5C6A64]">{resource.publisher}</span>
+                        </li>)}
+                      </ul>
+                    </aside>
+                  )}
+
                   {m.role === "assistant" && voiceEnabled && (
                     <button
                       onClick={() => speakMessage(m)}
