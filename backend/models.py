@@ -42,7 +42,7 @@ class HealthProfile(BaseModel):
 
 class ConversationCreate(BaseModel):
     title: Optional[str] = "New consultation"
-    model: str = "gpt-5.2"
+    model: str = "gpt-oss-120b"
     language: str = "en"
 
 
@@ -76,7 +76,7 @@ class MessageOut(BaseModel):
 class ChatRequest(BaseModel):
     conversation_id: Optional[str] = None
     message: str
-    model: str = "gpt-5.2"
+    model: str = "gpt-oss-120b"
     language: str = "en"
 
 
@@ -87,11 +87,11 @@ class TTSRequest(BaseModel):
 
 class AdminSettings(BaseModel):
     enabled_models: List[str] = [
-        "gpt-5.2", "gpt-4o",
+        "gpt-oss-120b", "gpt-4o",
         "claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001",
         "gemini-2.5-pro", "gemini-2.5-flash",
     ]
-    default_model: str = "gpt-5.2"
+    default_model: str = "gpt-oss-120b"
     disclaimer_text: str = (
         "This AI medical assistant provides general health information for educational purposes only. "
         "It is not a substitute for professional medical advice, diagnosis, or treatment. "
