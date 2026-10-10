@@ -27,7 +27,7 @@ export default function Chat() {
   const [sending, setSending] = useState(false);
   const [models, setModels] = useState([]);
   const [languages, setLanguages] = useState([]);
-  const [model, setModel] = useState("gemini-2.0-flash");
+  const [model, setModel] = useState("gpt-oss-120b");
   const [language, setLanguage] = useState("en");
   const [recording, setRecording] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
@@ -49,7 +49,7 @@ export default function Chat() {
 
         setModels(asArray(m?.data?.models));
         setLanguages(asArray(m?.data?.languages));
-        setModel(asArray(m?.data?.models).find(x => x.id === m?.data?.default) ? m.data.default : (asArray(m?.data?.models)[0]?.id || "gemini-2.0-flash"));
+        setModel(asArray(m?.data?.models).find(x => x.id === m?.data?.default) ? m.data.default : (asArray(m?.data?.models)[0]?.id || "gpt-oss-120b"));
         setVoiceEnabled(!!m?.data?.voice_enabled);
         setConversations(asArray(c?.data));
       } catch (e) {
@@ -70,7 +70,10 @@ export default function Chat() {
         const { data } = await api.get(`/chat/conversations/${routeConvId}`);
         setActiveId(routeConvId);
         setMessages(asArray(data?.messages));
-        if (data?.conversation?.model) setModel(data.conversation.model);
+        if (data?.conversation?.model) {
+          const saved = data.conversation.model;
+          setModel(({ "llama-3.3-70b": "gpt-oss-120b", "llama-3.1-8b": "gpt-oss-20b" })[saved] || saved);
+        }
         if (data?.conversation?.language) setLanguage(data.conversation.language);
       } catch (e) {
         toast.error(formatApiError(e?.response?.data?.detail));
