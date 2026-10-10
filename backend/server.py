@@ -36,32 +36,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def seed_admin():
-    admin_email = os.environ.get("ADMIN_EMAIL", "admin@susstyle.com").lower()
-    admin_password = os.environ.get("ADMIN_PASSWORD", "Admin@SusStyle2026")
-    existing = await db.users.find_one({"email": admin_email})
-    if existing is None:
-        await db.users.insert_one({
-            "email": admin_email,
-            "password_hash": hash_password(admin_password),
-            "name": "SusStyle Admin",
-            "role": "admin",
-            "banned": False,
-            "created_at": datetime.now(timezone.utc),
-            "health_profile": {},
-        })
-        logger.info(f"Seeded admin user: {admin_email}")
-    elif not verify_password(admin_password, existing["password_hash"]):
-        await db.users.update_one(
-            {"email": admin_email},
-            {"$set": {"password_hash": hash_password(admin_password), "role": "admin"}},
-        )
-        logger.info(f"Updated admin password for: {admin_email}")
-    # Ensure admin role
-    if existing and existing.get("role") != "admin":
-        await db.users.update_one({"email": admin_email}, {"$set": {"role": "admin"}})
-
-    # Settings doc
+async def initialize_settings():
+    # Preserve existing user credentials during application restarts.
     settings = await db.settings.find_one({"_id": "global"})
     if not settings:
         await db.settings.insert_one({"_id": "global", **AdminSettings().model_dump()})
@@ -78,7 +54,7 @@ async def setup_indexes():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await setup_indexes()
-    await seed_admin()
+    await initialize_settings()
     yield
     client.close()
 
