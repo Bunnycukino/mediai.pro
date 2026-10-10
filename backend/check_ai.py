@@ -1,9 +1,19 @@
 """Deployment smoke test: no user messages, profiles or secrets are printed."""
 import os
 import sys
+import json
+from pathlib import Path
 from openai import OpenAI
+from library_matching import match_reading
 
 def main():
+    catalogue = json.loads((Path(__file__).parent / "library.json").read_text(encoding="utf-8"))
+    assert match_reading("Where can I learn about asthma?", catalogue)[0]["id"] == "nhs-asthma"
+    assert match_reading("Co mogę przeczytać o astmie?", catalogue)[0]["id"] == "nhs-asthma"
+    assert match_reading("hello unrelatedxyz", catalogue) == []
+    assert match_reading("stomach pain", catalogue) == []
+    assert len(match_reading("asthma diabetes first aid depression", catalogue)) <= 3
+    print("Library metadata matching checks passed.")
     key = os.environ.get("GROQ_API_KEY")
     if not key:
         print("AI smoke test failed: GROQ_API_KEY is not configured.")
