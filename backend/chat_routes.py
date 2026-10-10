@@ -30,6 +30,15 @@ def resolve_model(model):
     key = LEGACY_MODELS.get(model, model)
     return key if key in MODEL_PROVIDERS else DEFAULT_MODEL
 
+
+def public_document(document):
+    """Expose the identifier expected by clients without mutating database records."""
+    result = dict(document)
+    identifier = str(result.get("_id", ""))
+    result["_id"] = identifier
+    result["id"] = identifier
+    return result
+
 LANGUAGES = {
     "en": "English", "es": "Spanish", "fr": "French", "de": "German",
     "it": "Italian", "pt": "Portuguese", "ru": "Russian", "ar": "Arabic",
@@ -65,6 +74,10 @@ Always respond in {lang_name}.
 Provide accurate, evidence-based medical information.
 Always recommend consulting a healthcare professional for diagnosis and treatment.
 Be compassionate and clear.
+By default, be brief and practical: usually 100-150 words, with a direct answer, at most three actionable steps, and when to seek professional help if relevant.
+Use plain language in the user's selected language. Avoid repeating the question, long introductions and unnecessary lists of possible diagnoses.
+Use short plain-text headings and simple bullets. Avoid tables, Markdown decoration and promotional language.
+Use more detail when requested or when needed for safety. Do not shorten away uncertainty, emergency advice or important cautions.
 You are not a doctor. You cannot diagnose or rule out serious illness.
 Do not claim to have consulted library articles or verified sources unless they were actually provided.
 Do not advise delaying care or changing prescribed treatment. For a life-threatening emergency in the UK, advise calling 999 or 112 immediately.
@@ -162,9 +175,7 @@ async def get_conversations(user: dict = Depends(get_current_user)):
     convs = await db.conversations.find(
         {"user_id": uid}
     ).sort("updated_at", -1).to_list(50)
-    for c in convs:
-        c["_id"] = str(c["_id"])
-    return convs
+    return [public_document(c) for c in convs]
 
 
 @router.post("/conversations")
@@ -179,8 +190,8 @@ async def create_conversation(data: ConversationCreate, user: dict = Depends(get
         "updated_at": datetime.now(timezone.utc),
     }
     result = await db.conversations.insert_one(doc)
-    doc["_id"] = str(result.inserted_id)
-    return doc
+    doc["_id"] = result.inserted_id
+    return public_document(doc)
 
 
 @router.get("/conversations/{conv_id}")
@@ -192,11 +203,8 @@ async def get_conversation(conv_id: str, user: dict = Depends(get_current_user))
     conv = await db.conversations.find_one({"_id": ObjectId(conv_id), "user_id": uid})
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    conv["_id"] = str(conv["_id"])
     messages = await db.messages.find({"conversation_id": conv_id}).sort("created_at", 1).to_list(200)
-    for m in messages:
-        m["_id"] = str(m["_id"])
-    return {"conversation": conv, "messages": messages}
+    return {"conversation": public_document(conv), "messages": [public_document(m) for m in messages]}
 
 
 @router.delete("/conversations/{conv_id}")
@@ -299,5 +307,5 @@ async def send_message(request: ChatRequest, user: dict = Depends(get_current_us
             {"$set": {"updated_at": datetime.now(timezone.utc), "title": messages[0]["content"][:50] if messages else "Consultation"}}
         )
 
-    assistant_msg["_id"] = str(assistant_msg.get("_id", ""))
-    return {"reply": reply, "conversation_id": conv_id, "message": assistant_msg}
+    return {"reply": reply, "conversation_id": conv_id,
+            "message": public_document(assistant_msg), "user_message": public_document(user_msg)}
