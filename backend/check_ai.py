@@ -2,12 +2,36 @@
 import os
 import sys
 import json
+import asyncio
+import subprocess
 from pathlib import Path
 from openai import OpenAI
 from library_matching import match_reading
 from chat_routes import public_document, build_system_prompt
 
+
+async def check_database_transactions():
+    """Read-only deployment probe; never creates or deletes any user records."""
+    from motor.motor_asyncio import AsyncIOMotorClient
+    client = AsyncIOMotorClient(os.environ["MONGO_URL"], serverSelectionTimeoutMS=15000)
+    try:
+        async with await client.start_session() as session:
+            async def read_only(current_session):
+                await client[os.environ["DB_NAME"]].users.find_one(
+                    {"_id": "__mediai_read_only_transaction_probe__"}, {"_id": 1}, session=current_session)
+            await session.with_transaction(read_only)
+        print("Read-only database transaction probe passed.")
+    finally:
+        client.close()
+
 def main():
+    subprocess.run([sys.executable, "-m", "unittest", "discover", "-s",
+                    str(Path(__file__).parent / "tests"), "-p", "test_account_storage.py"], check=True)
+    try:
+        asyncio.run(check_database_transactions())
+    except Exception as exc:
+        print(f"Database transaction probe failed: {type(exc).__name__}.")
+        return 1
     sample = {"_id": "test-id", "content": "synthetic test"}
     public = public_document(sample)
     assert public["id"] == public["_id"] == "test-id"
