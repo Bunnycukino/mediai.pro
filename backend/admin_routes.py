@@ -6,6 +6,7 @@ from bson import ObjectId
 
 from auth_utils import require_admin
 from models import AdminSettings, UpdateRoleRequest, BanRequest
+from account_storage import delete_account, AccountUnavailable
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -100,10 +101,11 @@ async def delete_user(user_id: str, admin=Depends(require_admin)):
         raise HTTPException(status_code=400, detail="Invalid user id")
     if str(oid) == admin["id"]:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
-    await db.users.delete_one({"_id": oid})
-    await db.conversations.delete_many({"user_id": user_id})
-    await db.messages.delete_many({"user_id": user_id})
-    return {"ok": True}
+    try:
+        deleted = await delete_account(db, oid)
+    except AccountUnavailable:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"ok": True, "deleted": deleted}
 
 
 @router.get("/users/{user_id}/conversations")
