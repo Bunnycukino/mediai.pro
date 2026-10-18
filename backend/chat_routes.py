@@ -10,6 +10,8 @@ from auth_utils import get_current_user
 from models import ChatRequest, ConversationCreate
 from library_routes import CATALOGUE
 from library_matching import match_reading
+from account_storage import (create_chat, store_user_turn, store_assistant_turn, delete_chat,
+                             AccountUnavailable, ConversationUnavailable)
 import json
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -181,16 +183,10 @@ async def get_conversations(user: dict = Depends(get_current_user)):
 @router.post("/conversations")
 async def create_conversation(data: ConversationCreate, user: dict = Depends(get_current_user)):
     from server import db
-    uid = str(user["id"])
-    doc = {
-        "user_id": uid,
-        "title": data.title or "New consultation",
-        "model": resolve_model(data.model),
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
-    }
-    result = await db.conversations.insert_one(doc)
-    doc["_id"] = result.inserted_id
+    try:
+        doc = await create_chat(db, ObjectId(user["id"]), data.title, resolve_model(data.model))
+    except AccountUnavailable:
+        raise HTTPException(status_code=403, detail="Account is no longer available")
     return public_document(doc)
 
 
@@ -213,10 +209,12 @@ async def delete_conversation(conv_id: str, user: dict = Depends(get_current_use
     uid = str(user["id"])
     if not is_valid_object_id(conv_id):
         raise HTTPException(status_code=404, detail="Conversation not found")
-    result = await db.conversations.delete_one({"_id": ObjectId(conv_id), "user_id": uid})
-    if result.deleted_count == 0:
+    try:
+        await delete_chat(db, ObjectId(uid), ObjectId(conv_id))
+    except AccountUnavailable:
+        raise HTTPException(status_code=403, detail="Account is no longer available")
+    except ConversationUnavailable:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    await db.messages.delete_many({"conversation_id": conv_id})
     return {"ok": True}
 
 
@@ -227,38 +225,16 @@ async def send_message(request: ChatRequest, user: dict = Depends(get_current_us
     model_key = resolve_model(request.model)
     provider, model_id = MODEL_PROVIDERS[model_key]
 
-    # Get or create conversation
-    conv_id = request.conversation_id
-    if conv_id and is_valid_object_id(conv_id):
-        conv = await db.conversations.find_one({"_id": ObjectId(conv_id), "user_id": uid})
-        if not conv:
-            conv_id = None
-    else:
-        conv_id = None
-
-    if not conv_id:
-        title = request.message[:50] if request.message else "New consultation"
-        doc = {
-            "user_id": uid,
-            "title": title,
-            "model": model_key,
-            "created_at": datetime.now(timezone.utc),
-            "updated_at": datetime.now(timezone.utc),
-        }
-        result = await db.conversations.insert_one(doc)
-        conv_id = str(result.inserted_id)
-
-    # Save user message
-    user_msg = {
-        "conversation_id": conv_id,
-        "role": "user",
-        "content": request.message,
-        "created_at": datetime.now(timezone.utc),
-    }
-    await db.messages.insert_one(user_msg)
-
-    # Build message history
-    history = await db.messages.find({"conversation_id": conv_id}).sort("created_at", 1).to_list(50)
+    if request.conversation_id and not is_valid_object_id(request.conversation_id):
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    try:
+        conv_id, user_msg, history = await store_user_turn(
+            db, ObjectId(uid), ObjectId(request.conversation_id) if request.conversation_id else None,
+            request.message, model_key, request.language or "en")
+    except AccountUnavailable:
+        raise HTTPException(status_code=403, detail="Account is no longer available")
+    except ConversationUnavailable:
+        raise HTTPException(status_code=404, detail="Conversation not found")
     messages = [{"role": m["role"], "content": m["content"]} for m in history]
 
     # Get user profile
@@ -290,22 +266,15 @@ async def send_message(request: ChatRequest, user: dict = Depends(get_current_us
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"AI service error: {str(e)[:300]}")
 
-    # Save assistant message
-    assistant_msg = {
-        "conversation_id": conv_id,
-        "role": "assistant",
-        "content": reply,
-        "model": model_key,
-        "further_reading": further_reading,
-        "created_at": datetime.now(timezone.utc),
-    }
-    await db.messages.insert_one(assistant_msg)
-
-    if is_valid_object_id(conv_id):
-        await db.conversations.update_one(
-            {"_id": ObjectId(conv_id)},
-            {"$set": {"updated_at": datetime.now(timezone.utc), "title": messages[0]["content"][:50] if messages else "Consultation"}}
-        )
+    # The model call stays outside the transaction; deleted accounts/chats cannot be recreated.
+    try:
+        assistant_msg = await store_assistant_turn(
+            db, ObjectId(uid), ObjectId(conv_id), reply, model_key,
+            request.language or "en", further_reading)
+    except AccountUnavailable:
+        raise HTTPException(status_code=403, detail="Account is no longer available")
+    except ConversationUnavailable:
+        raise HTTPException(status_code=404, detail="Conversation not found")
 
     return {"reply": reply, "conversation_id": conv_id,
             "message": public_document(assistant_msg), "user_message": public_document(user_msg)}
